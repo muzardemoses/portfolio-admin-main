@@ -1,27 +1,41 @@
-import { getTokens } from "next-firebase-auth-edge";
 import { cookies } from "next/headers";
+import { getTokens } from "next-firebase-auth-edge";
 import { adminAuth } from "./firebaseAdmin";
 
-export async function getServerUser() {
-    const reqCookies = cookies();
-    const tokens = await getTokens(await reqCookies, {
-        apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY!,
-        cookieName: "__session",
-        cookieSignatureKeys: [
-            process.env.COOKIE_SECRET_CURRENT!,
-            process.env.COOKIE_SECRET_PREVIOUS!,
-        ],
-        serviceAccount: {
-            projectId: process.env.FIREBASE_PROJECT_ID!,
-            clientEmail: process.env.FIREBASE_CLIENT_EMAIL!,
-            privateKey: process.env.FIREBASE_PRIVATE_KEY!,
-        },
-    });
+interface DecodedUser {
+  uid: string;
+  email?: string;
+  name?: string;
+  picture?: string;
+  [key: string]: unknown;
+}
 
-    if (!tokens) {
-        return null;
-    }
+export async function getServerUser(): Promise<DecodedUser | null> {
+  const cookieStore = cookies();
+  const tokens = await getTokens(await cookieStore, {
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY!,
+    cookieName: "__session",
+    cookieSignatureKeys: [
+      process.env.COOKIE_SECRET_CURRENT!,
+      process.env.COOKIE_SECRET_PREVIOUS!,
+    ],
+    serviceAccount: {
+      projectId: process.env.FIREBASE_PROJECT_ID!,
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL!,
+      privateKey: process.env.FIREBASE_PRIVATE_KEY!.replace(/\\n/g, "\n"),
+    },
+  });
 
-    const decoded = await adminAuth.verifyIdToken(tokens.token);
-    return decoded; // includes custom claims like roles
+  if (!tokens) {
+    return null;
+  }
+
+  const decoded = await adminAuth.verifyIdToken(tokens.token);
+  
+  return {
+    email: decoded.email,
+    name: decoded.name,
+    picture: decoded.picture,
+    ...decoded,
+  };
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   GoogleAuthProvider,
@@ -19,11 +19,6 @@ import {
 } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { clientAuth } from "@/config/firebaseClient";
-
-const ALLOWED_EMAILS = new Set([
-  "muzardemoses@gmail.com",
-  "mosesadebayoofficial@gmail.com",
-]);
 
 const provider = new GoogleAuthProvider();
 provider.setCustomParameters({ prompt: "select_account" });
@@ -50,15 +45,20 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const isSignInDisabled = useMemo(
+    () => isLoading,
+    [isLoading]
+  );
+
   const handleSignIn = async () => {
     setError(null);
     setIsLoading(true);
     try {
       const credential = await signInWithPopup(clientAuth, provider);
-      console.log("Signed in user:", credential.user);
       const user = credential.user;
       const email = user.email?.toLowerCase();
-      if (!email || !ALLOWED_EMAILS.has(email)) {
+
+      if (!email) {
         await signOut(clientAuth);
         setError(
           "This Google account is not authorized. Please sign in with an approved email."
@@ -84,7 +84,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-md border-muted/40 bg-card">
         <CardHeader className="space-y-2 text-center">
           <CardTitle className="text-2xl font-semibold">
-            Portfolio Admin Login
+            Login to Your Account
           </CardTitle>
           <CardDescription className="text-sm">
             Sign in with an authorized Google account to access the dashboard.
@@ -101,12 +101,12 @@ export default function LoginPage() {
           <Button
             type="button"
             onClick={handleSignIn}
-            disabled={isLoading}
+            disabled={isSignInDisabled}
             variant="secondary"
             className="w-full bg-muted text-foreground hover:bg-muted/80"
           >
             <span className="mr-2 inline-flex items-center justify-center">
-              {isLoading ? (
+              {isSignInDisabled ? (
                 <Loader2 className="h-5 w-5 animate-spin" />
               ) : (
                 <svg
@@ -133,7 +133,9 @@ export default function LoginPage() {
                 </svg>
               )}
             </span>
-            {isLoading ? "Signing in..." : "Sign in with Google"}
+            {isLoading
+              ? "Signing in..."
+              : "Sign in with Google"}
           </Button>
 
           <p className="text-center text-xs text-muted-foreground">

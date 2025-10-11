@@ -59,15 +59,17 @@ An authenticated admin dashboard for managing portfolio content. Built with **Ne
 
 ## Authentication Flow
 
-- The `/login` page uses `signInWithPopup` and only allows the approved Google accounts listed in `src/app/(auth)/login/page.tsx`.
+- The `/login` page uses `signInWithPopup` and loads the list of approved Google accounts from Firestore (`config/administration` document, `emails` field) using `getConfigField`.
 - After a successful Google sign-in, a POST request to `/api/login`:
   - Verifies the ID token with Firebase Admin
-  - Re-enforces the same email allow-list (see `src/app/api/login/route.ts`)
+  - Reloads the same allow-list from Firestore to enforce server-side authorization
   - Creates/updates a document in the `users` collection with profile details (`displayName`, `email`, `photoURL`, `provider`, `role`, `createdAt`, `lastLogin`, etc.)
   - Issues secure cookies via `next-firebase-auth-edge`
-- `src/middleware.ts` protects every non-public route, redirecting unauthenticated users back to `/login`.
+- Authenticated requests pass through `src/middleware.ts`, which protects every non-public route and redirects unauthenticated users to `/login`.
+- Sidebar user info is sourced in `src/app/(dashboard)/layout.tsx` via `getServerUser`, so the signed-in admin’s name/avatar appear throughout the UI.
+- Logging out triggers `/api/logout`, which clears the auth cookies and signs out the Firebase client after a confirmation dialog.
 
-To approve additional admins, update the allow-list in both the login page and API route.
+To approve additional admins, update the array stored in Firestore at `config/administration.emails` and have users sign in with one of those addresses.
 
 ## Project Structure Highlights
 

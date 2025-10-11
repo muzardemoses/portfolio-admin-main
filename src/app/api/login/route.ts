@@ -3,17 +3,30 @@ import { setAuthCookies } from "next-firebase-auth-edge/next/cookies";
 import { FieldValue } from "firebase-admin/firestore";
 import { adminAuth, adminDb } from "@/config/firebaseAdmin";
 
-const ALLOWED_EMAILS = new Set([
-  "muzardemoses@gmail.com",
-  "mosesadebayoofficial@gmail.com",
-]);
-
 function getEnv(name: string): string {
   const value = process.env[name];
   if (!value) {
     throw new Error(`Missing required environment variable: ${name}`);
   }
   return value;
+}
+
+async function fetchAllowedEmails(): Promise<Set<string>> {
+  const settingsRef = adminDb.collection("settings").doc("admins");
+  const snapshot = await settingsRef.get();
+
+  if (!snapshot.exists) {
+    return new Set();
+  }
+  const raw = snapshot.get("emails");
+  if (!Array.isArray(raw)) {
+    return new Set();
+  }
+  return new Set(
+    raw
+      .map((email) => (typeof email === "string" ? email.toLowerCase() : null))
+      .filter((email): email is string => Boolean(email))
+  );
 }
 
 export async function POST(request: NextRequest) {
@@ -41,7 +54,9 @@ export async function POST(request: NextRequest) {
   }
 
   const email = decodedToken.email?.toLowerCase();
-  if (!email || !ALLOWED_EMAILS.has(email)) {
+  const allowedEmails = await fetchAllowedEmails();
+  if (!email || !allowedEmails.has(email)) {
+    console.warn("Unauthorized email attempt:", email);
     return NextResponse.json(
       { success: false, message: "Email not authorized" },
       { status: 403 }

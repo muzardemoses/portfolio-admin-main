@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Portfolio Admin Dashboard",
-  description: "Administration panel for the Muzarde portfolio experience.",
+  description: "Administration panel for the Muzarde portfolio experience built by @muzardemoses.",
 };
 
 export default function RootLayout({
@@ -24,6 +24,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link
+          rel="icon"
+          href="/images/logo.png"
+        />
+        <meta name="theme-color" content="#1d90ff" />
+      </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         {children}
       </body>

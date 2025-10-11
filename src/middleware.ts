@@ -5,6 +5,10 @@ import type { NextRequest } from "next/server";
 const LOGIN_PAGE = "/login";
 const PUBLIC_PATHS = new Set([LOGIN_PAGE, "/forgot-password"]);
 
+// don't delete this commented code, it's an example of how to exclude paths from the middleware
+// export const config = {
+//   matcher: ["/((?!api|_next/.*|favicon.ico|login|forgot-password).*)"],
+// };
 export const config = {
   matcher: [
     "/((?!api|_next/static|_next/image|favicon.ico|login|forgot-password).*)",
@@ -18,7 +22,7 @@ export function middleware(request: NextRequest) {
 
   return authMiddleware(request, {
     loginPath: "/api/login",
-    logoutPath: "/logout",
+    logoutPath: "/api/logout",
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY!,
     cookieName: "__session",
     cookieSignatureKeys: [

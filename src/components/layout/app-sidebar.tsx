@@ -10,6 +10,7 @@ import {
   Users2,
   Command,
   Sparkles,
+  FolderKanban,
   type LucideIcon,
 } from "lucide-react";
 import {
@@ -23,55 +24,14 @@ import { NavMain } from "@/components/layout/nav-main";
 import { NavProjects } from "@/components/layout/nav-projects";
 import { NavUser } from "@/components/layout/nav-user";
 import { TeamSwitcher } from "@/components/layout/team-switcher";
+import { navConfig } from "@/lib/nav";
 
-const navConfig = {
-  navMain: [
-    {
-      title: "Dashboard",
-      url: "/",
-      icon: "layout-dashboard",
-      isActive: true,
-      items: [
-        { title: "Overview", url: "/" },
-        { title: "Analytics", url: "/analytics" },
-        { title: "Projects", url: "/projects" },
-      ],
-    },
-    {
-      title: "Content",
-      url: "/dashboard/content",
-      icon: "files",
-      items: [
-        { title: "Posts", url: "/content/posts" },
-        { title: "Gallery", url: "/content/gallery" },
-        { title: "Testimonials", url: "/content/testimonials" },
-      ],
-    },
-    {
-      title: "Settings",
-      url: "/settings",
-      icon: "settings",
-      items: [
-        { title: "Profile", url: "/settings/profile" },
-        { title: "Team", url: "/settings/team" },
-        { title: "Billing", url: "/settings/billing" },
-      ],
-    },
-  ],
-  projects: [
-    { name: "Portfolio Website", url: "/projects/portfolio", icon: "monitor" },
-    { name: "Brand Assets", url: "/projects/brand", icon: "palette" },
-    { name: "Client Feedback", url: "/projects/clients", icon: "users" },
-  ],
-  teams: [
-    { name: "Muzarde Studio", logo: "/images/logo.png", plan: "Pro" },
-    { name: "Creative Lab", logo: "/images/logo.png", plan: "Collaborator" },
-  ],
-};
+
 
 const navIconMap: Record<string, LucideIcon> = {
   "layout-dashboard": LayoutDashboard,
   files: Files,
+  "folder-kanban": FolderKanban,
   settings: Settings2,
   monitor: MonitorSmartphone,
   palette: Palette,
